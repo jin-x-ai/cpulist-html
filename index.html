@@ -45,7 +45,7 @@ tbody tr{height:42px}td{height:42px;padding:6px;border-right:1px solid var(--lin
 <script>
 (function(){
 "use strict";
-var ROW=42,OVER=14,LOOKUP="https://www.cpubenchmark.net/cpu_lookup.php?cpu=",all=[],rowById=new Map(),view=[],filters={},enumSelected={},enumOptions={},frame=0,dragColumn="",dragTable="",dragRow=null;
+var ROW=42,OVER=14,LOOKUP="https://www.cpubenchmark.net/cpu_lookup.php?cpu=",all=[],rowById=new Map(),view=[],filters={},enumSelected={},enumOptions={},frame=0,dataLoaded=false,dragColumn="",dragTable="",dragRow=null;
 function getCookie(k){var m=document.cookie.match(new RegExp("(?:^|; )"+k.replace(/[.*+?^$()|[\\]\\\\]/g,"\\\\$&")+"=([^;]*)"));return m?decodeURIComponent(m[1]):null}
 function setCookie(k,v){document.cookie=k+"="+encodeURIComponent(v)+"; Max-Age=31536000; Path=/; SameSite=Lax"}
 function cookieJson(k,d){try{var v=getCookie(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
@@ -153,6 +153,7 @@ function mainCell(c,r,ref){var val=c.f(r),html=esc(val);if(c.key==="name"){var h
 function updateMainModeButtons(){document.getElementById("mainPercent").classList.toggle("on",mainMode==="percent");document.getElementById("mainRatio").classList.toggle("on",mainMode==="ratio")}
 function renderRows(){
  var body=table.tBodies[0];if(!body)return;var cs=ordered(),total=view.length,colspan=cs.length+2;
+ if(!dataLoaded){body.innerHTML='<tr class="empty"><td colspan="'+colspan+'">Loading CPU data…</td></tr>';return}
  if(!total){body.innerHTML='<tr class="empty"><td colspan="'+colspan+'">No CPUs match the current filters.</td></tr>';return}
  var ref=mainReferenceId?rowById.get(mainReferenceId):null,start=Math.max(0,Math.floor(shell.scrollTop/ROW)-OVER),count=Math.ceil(shell.clientHeight/ROW)+OVER*2,end=Math.min(total,start+count),h="";
  if(start)h+='<tr class="spacer" style="height:'+(start*ROW)+'px"><td colspan="'+colspan+'"></td></tr>';
@@ -214,7 +215,7 @@ splitter.addEventListener("keydown",function(e){if(e.key==="ArrowUp"){setSplit(s
 splitter.addEventListener("dblclick",function(){var available=splitArea.clientHeight-splitter.offsetHeight;if(available<=0)return;var needed=Math.max(comparisons.length?88:60,comparisonHeight()),target=Math.max(50,100-needed/available*100);setSplit(target,true)});
 addEventListener("resize",function(){setSplit(desiredSplitPct,false);renderRows();closePop()});
 themeLabel();fontSizeUi();updateMainModeButtons();setComparisonsHidden(comparisonsHidden,false);setSplit(splitPct,false);renderColumns();renderComparisons();
-fetch("api/getdata.php",{headers:{accept:"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t||("HTTP "+r.status))});return r.json()}).then(function(p){if(!p||!Array.isArray(p.data))throw new Error("Unexpected data format");all=p.data;rowById=new Map(all.map(function(r){return[cpuId(r),r]}));comparisons.forEach(function(c){c.rows=c.rows.map(function(r){return rowById.get(cpuId(r))||r})});buildEnumOptions();renderTable();apply(true);renderComparisons()}).catch(function(e){summary.innerHTML='<span class="error">Could not load PassMark data</span>';table.innerHTML='<tbody><tr class="empty"><td>'+esc(e.message)+"</td></tr></tbody>"});
+fetch("api/getdata.php",{headers:{accept:"application/json"}}).then(function(r){if(!r.ok)return r.text().then(function(t){throw new Error(t||("HTTP "+r.status))});return r.json()}).then(function(p){if(!p||!Array.isArray(p.data))throw new Error("Unexpected data format");all=p.data;dataLoaded=true;rowById=new Map(all.map(function(r){return[cpuId(r),r]}));comparisons.forEach(function(c){c.rows=c.rows.map(function(r){return rowById.get(cpuId(r))||r})});buildEnumOptions();renderTable();apply(true);renderComparisons()}).catch(function(e){summary.innerHTML='<span class="error">Could not load PassMark data</span>';table.innerHTML='<tbody><tr class="empty"><td>'+esc(e.message)+"</td></tr></tbody>"});
 })();
 </script>
 </body>
