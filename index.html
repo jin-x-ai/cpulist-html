@@ -59,7 +59,7 @@ function i(v){var x=n(v);return x==null?0:x}
 function dv(v){var x=Date.parse(String(v||"")+" 1");return Number.isFinite(x)?x:null}
 function sv(v){var x=n(v);return x==null||x<0?null:x/1000}
 function threads(r){return i(r.cores)*i(r.logicals||1)+i(r.secondaryCores)*i(r.secondaryLogicals||1)}
-function threadFormula(r){var pc=i(r.cores),pt=i(r.logicals||1),ec=i(r.secondaryCores),et=i(r.secondaryLogicals||1),parts=[];if(pc)parts.push(String(pc)+(pt!==1?"*"+pt:""));if(ec)parts.push(String(ec)+(et!==1?"*"+et:""));return parts.join(" + ")}
+function threadFormula(r){var pc=i(r.cores),pt=i(r.logicals||1),ec=i(r.secondaryCores),et=i(r.secondaryLogicals||1),parts=[];if(pc)parts.push(String(pc)+(pt!==1?"×"+pt:""));if(ec)parts.push(String(ec)+(et!==1?"×"+et:""));return parts.join(" + ")}
 function pCores(r){return String(r.family)==="21"?i(r.cores)*i(r.logicals||1):n(r.cores)}
 function modules(r){return String(r.family)==="21"?n(r.cores):null}
 function txt(v){return v==null||v===""?"NA":String(v)}
